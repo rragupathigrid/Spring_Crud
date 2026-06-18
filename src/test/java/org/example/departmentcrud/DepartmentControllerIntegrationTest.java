@@ -208,4 +208,93 @@ class DepartmentControllerIntegrationTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    void shouldReturnBadRequestWhenDepartmentNameAndLocationAreBlank() throws Exception {
+
+        String request = """
+            {
+              "departmentName": "",
+              "location": ""
+            }
+            """;
+
+        mockMvc.perform(post("/api/departments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Validation failed"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.departmentName").exists())
+                .andExpect(jsonPath("$.errors.location").exists());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenDepartmentNameContainsInvalidCharacters() throws Exception {
+
+        String request = """
+            {
+              "departmentName": "IT@@@",
+              "location": "Chennai"
+            }
+            """;
+
+        mockMvc.perform(post("/api/departments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Validation failed"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.departmentName").exists());
+    }
+
+
+    @Test
+    void shouldReturnBadRequestWhenDepartmentIdIsNegative() throws Exception {
+
+        mockMvc.perform(get("/api/departments/-1"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Constraint violation"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.id").exists());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenDepartmentIdIsNotNumber() throws Exception {
+
+        mockMvc.perform(get("/api/departments/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Invalid parameter type"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.id").exists());
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDepartmentDoesNotExist() throws Exception {
+
+        mockMvc.perform(get("/api/departments/999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.title").value("Department not found"))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.detail").value("Department not found with id: 999"));
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenUpdateRequestIsInvalid() throws Exception {
+
+        String request = """
+            {
+              "departmentName": "",
+              "location": ""
+            }
+            """;
+
+        mockMvc.perform(put("/api/departments/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("Validation failed"))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errors.departmentName").exists())
+                .andExpect(jsonPath("$.errors.location").exists());
+    }
 }

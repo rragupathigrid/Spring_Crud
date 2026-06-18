@@ -3,6 +3,7 @@ package org.example.departmentcrud.service;
 import org.example.departmentcrud.dto.DepartmentRequest;
 import org.example.departmentcrud.dto.DepartmentResponse;
 import org.example.departmentcrud.entity.Department;
+import org.example.departmentcrud.exception.DepartmentNotFoundException;
 import org.example.departmentcrud.repository.DepartmentRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,57 +12,69 @@ import java.util.List;
 @Service
 public class DepartmentService {
 
-    private final DepartmentRepository departmentRepository;
+    private final DepartmentRepository repository;
 
-
-    public DepartmentService(DepartmentRepository departmentRepository) {
-        this.departmentRepository = departmentRepository;
+    public DepartmentService(DepartmentRepository repository) {
+        this.repository = repository;
     }
 
-    public DepartmentResponse createDepartment(DepartmentRequest departmentRequest){
+    public DepartmentResponse createDepartment(DepartmentRequest request) {
 
         Department department = new Department();
 
-        department.setDepartmentName(departmentRequest.getDepartmentName());
-        department.setLocation(departmentRequest.getLocation());
+        department.setDepartmentName(request.getDepartmentName());
+        department.setLocation(request.getLocation());
 
-        Department savedDepartment = departmentRepository.save(department);
+        Department savedDepartment = repository.save(department);
 
-        return new DepartmentResponse(savedDepartment.getId(), savedDepartment.getDepartmentName(), savedDepartment.getLocation());
+        return mapToResponse(savedDepartment);
+    }
+
+    public DepartmentResponse getDepartmentById(Long id) {
+
+        Department department = repository.findById(id)
+                .orElseThrow(() -> new DepartmentNotFoundException(id));
+
+        return mapToResponse(department);
     }
 
     public List<DepartmentResponse> getAllDepartments() {
 
-        return departmentRepository.findAll().stream()
-                .map(department -> new DepartmentResponse(department.getId(), department.getDepartmentName(), department.getLocation()))
+        return repository.findAll()
+                .stream()
+                .map(this::mapToResponse)
                 .toList();
     }
 
-    public DepartmentResponse getDepartmentById(Long id) {
-        Department department = departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
+    public DepartmentResponse updateDepartment(Long id, DepartmentRequest request) {
 
-        return new DepartmentResponse(department.getId(), department.getDepartmentName(), department.getLocation());
-    }
+        Department department = repository.findById(id)
+                .orElseThrow(() -> new DepartmentNotFoundException(id));
 
-    public DepartmentResponse updateDepartment(Long id , DepartmentRequest departmentRequest){
+        department.setDepartmentName(request.getDepartmentName());
+        department.setLocation(request.getLocation());
 
-        Department department = departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
+        Department updatedDepartment = repository.save(department);
 
-        department.setDepartmentName(departmentRequest.getDepartmentName());
-        department.setLocation(departmentRequest.getLocation());
-
-        Department updatedDepartment = departmentRepository.save(department);
-
-        return new DepartmentResponse(updatedDepartment.getId(), updatedDepartment.getDepartmentName(), updatedDepartment.getLocation());
+        return mapToResponse(updatedDepartment);
     }
 
     public void deleteDepartment(Long id) {
-        Department department = departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
 
-        departmentRepository.delete(department);
+        Department department = repository.findById(id)
+                .orElseThrow(() -> new DepartmentNotFoundException(id));
+
+        repository.delete(department);
     }
 
+    private DepartmentResponse mapToResponse(Department department) {
+
+        DepartmentResponse response = new DepartmentResponse();
+
+        response.setId(department.getId());
+        response.setDepartmentName(department.getDepartmentName());
+        response.setLocation(department.getLocation());
+
+        return response;
+    }
 }

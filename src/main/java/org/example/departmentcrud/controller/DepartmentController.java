@@ -1,14 +1,18 @@
 package org.example.departmentcrud.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.example.departmentcrud.dto.DepartmentRequest;
 import org.example.departmentcrud.dto.DepartmentResponse;
 import org.example.departmentcrud.service.DepartmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/departments")
 public class DepartmentController {
@@ -21,23 +25,19 @@ public class DepartmentController {
 
     @PostMapping
     public ResponseEntity<DepartmentResponse> createDepartment(
-            @RequestBody DepartmentRequest request) {
+            @Valid @RequestBody DepartmentRequest request) {
 
-        DepartmentResponse response =
-                service.createDepartment(request);
+        DepartmentResponse response = service.createDepartment(request);
 
-        return new ResponseEntity<>(
-                response,
-                HttpStatus.CREATED
-        );
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentResponse> getDepartmentById(
-            @PathVariable Long id) {
+            @PathVariable
+            @Positive(message = "Department id must be positive") Long id) {
 
-        DepartmentResponse response =
-                service.getDepartmentById(id);
+        DepartmentResponse response = service.getDepartmentById(id);
 
         return ResponseEntity.ok(response);
     }
@@ -45,26 +45,26 @@ public class DepartmentController {
     @GetMapping
     public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
 
-        List<DepartmentResponse> departments =
-                service.getAllDepartments();
+        List<DepartmentResponse> departments = service.getAllDepartments();
 
         return ResponseEntity.ok(departments);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentResponse> updateDepartment(
-            @PathVariable Long id,
-            @RequestBody DepartmentRequest request) {
+            @PathVariable
+            @Positive(message = "Department id must be positive") Long id,
+            @Valid @RequestBody DepartmentRequest request) {
 
-        DepartmentResponse response =
-                service.updateDepartment(id, request);
+        DepartmentResponse response = service.updateDepartment(id, request);
 
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDepartment(
-            @PathVariable Long id) {
+            @PathVariable
+            @Positive(message = "Department id must be positive") Long id) {
 
         service.deleteDepartment(id);
 
