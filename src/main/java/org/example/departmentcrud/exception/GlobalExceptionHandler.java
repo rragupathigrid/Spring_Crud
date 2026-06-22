@@ -130,11 +130,6 @@ public class GlobalExceptionHandler {
 
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        problemDetail.setType(URI.create("https://example.com/problems/internal-server-error"));
-        problemDetail.setTitle("Internal server error");
-        problemDetail.setDetail("Something went wrong");
-        problemDetail.setProperty("timestamp", Instant.now());
-
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(problemDetail);
