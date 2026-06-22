@@ -15,5 +15,4 @@ public @interface ValidDepartmentName {
 
     Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
 }
