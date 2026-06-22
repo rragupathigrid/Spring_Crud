@@ -13,4 +13,7 @@ public @interface ValidDepartmentName {
 
     String message() default "Department name can contain only letters, spaces, hyphen and ampersand";
 
+    Class<?>[] groups() default {};
+
+    Class<? extends Payload>[] payload() default {};
 }

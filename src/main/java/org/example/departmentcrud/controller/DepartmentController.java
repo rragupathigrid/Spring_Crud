@@ -1,16 +1,17 @@
 package org.example.departmentcrud.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import org.example.departmentcrud.dto.DepartmentRequest;
 import org.example.departmentcrud.dto.DepartmentResponse;
+import org.example.departmentcrud.dto.PageResponse;
 import org.example.departmentcrud.service.DepartmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Validated
 @RestController
@@ -43,9 +44,30 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
+    public ResponseEntity<PageResponse<DepartmentResponse>> getAllDepartments(
+            @RequestParam(required = false) String departmentName,
+            @RequestParam(required = false) String location,
 
-        List<DepartmentResponse> departments = service.getAllDepartments();
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "Page number must be 0 or greater") int page,
+
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "Page size must be at least 1")
+            @Max(value = 100, message = "Page size must not be greater than 100") int size,
+
+            @RequestParam(defaultValue = "id") String sortBy,
+
+            @RequestParam(defaultValue = "ASC") String sortDirection
+    ) {
+
+        PageResponse<DepartmentResponse> departments = service.getAllDepartments(
+                departmentName,
+                location,
+                page,
+                size,
+                sortBy,
+                sortDirection
+        );
 
         return ResponseEntity.ok(departments);
     }

@@ -125,10 +125,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ProblemDetail> handleGenericException(
-            Exception ex) {
+    public ResponseEntity<ProblemDetail> handleGenericException(Exception ex) {
+
+        ex.printStackTrace();
 
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        problemDetail.setTitle("Internal Server Error");
+        problemDetail.setDetail(ex.getMessage());
+        problemDetail.setProperty("timestamp", Instant.now());
 
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -145,4 +149,6 @@ public class GlobalExceptionHandler {
 
         return parts[parts.length - 1];
     }
+
+
 }
